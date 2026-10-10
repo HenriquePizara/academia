@@ -1,0 +1,32 @@
+---
+const WA = "https://wa.me/551194708842?text=Ol%C3%A1%20Academia!%20Quero%20saber%20mais%20e%20come%C3%A7ar%20a%20treinar.";
+const planos = [
+  { nome: 'Essencial', destaque: false, itens: ['Musculação completa', 'Avaliação física orientativa', 'Acesso seg a sáb', 'App de treino'], cta: 'Entrar em contato' },
+  { nome: 'Performance', destaque: true, itens: ['Tudo do Essencial', 'Modalidades coletivas inclusas', 'Acompanhamento quinzenal', 'Prioridade no suporte'], cta: 'Entrar em contato' },
+  { nome: 'Elite', destaque: false, itens: ['Tudo do Performance', 'Treinos personalizados', 'Acompanhamento semanal', 'Benefícios exclusivos'], cta: 'Entrar em contato' },
+];
+---
+<section id="planos" class="bg-[#0A0A0A]">
+  <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <p class="text-center text-xs font-bold tracking-[0.18em] text-[#F97316]">PLANOS</p>
+    <h2 class="mt-2 text-center text-[30px] sm:text-[40px] font-black tracking-tight text-white" style="font-family: Oswald, sans-serif">ESCOLHA SEU PRÓXIMO NÍVEL</h2>
+    <p class="mx-auto mt-3 max-w-[720px] text-center text-sm leading-6 text-zinc-400">Sem pegadinhas. Escolha o ritmo que cabe na sua rotina e evolua com método. Fale com a recepção para valores e condições atuais.</p>
+    <div class="mt-8 grid gap-5 lg:grid-cols-3">
+      {planos.map(p => (
+        <div class={`relative rounded-[22px] border p-6 sm:p-7 flex flex-col ${p.destaque ? 'bg-white text-zinc-900 border-white shadow-[0_20px_60px_rgba(0,0,0,.35)] scale-[1.02]' : 'bg-[#111113] text-white border-white/10'}`}>
+          {p.destaque && <span class="absolute -top-3 left-6 rounded-full bg-[#DC2626] px-3 py-1 text-xs font-black tracking-wide text-white">MAIS ESCOLHIDO</span>}
+          <h3 class="text-[18px] font-black tracking-tight" style="font-family: Oswald, sans-serif">{p.nome}</h3>
+          <p class={`mt-1 text-sm ${p.destaque ? 'text-zinc-600' : 'text-zinc-400'}`}>Ideal para começar com consistência e evoluir com segurança.</p>
+          <ul class="mt-5 grid gap-2.5 text-sm">
+            {p.itens.map(it => (
+              <li class="flex gap-2.5"><span class={`mt-1 h-2 w-2 rounded-full shrink-0 ${p.destaque ? 'bg-[#DC2626]' : 'bg-[#F97316]'}`}></span><span class={p.destaque ? 'text-zinc-700' : 'text-zinc-300'}>{it}</span></li>
+            ))}
+          </ul>
+          <a href={WA} target="_blank" rel="noopener" class={`mt-7 inline-flex h-[48px] items-center justify-center rounded-full font-extrabold tracking-wide transition ${p.destaque ? 'bg-[#DC2626] hover:bg-[#B91C1C] text-white' : 'bg-white text-zinc-900 hover:bg-zinc-100'}`}>{p.cta}</a>
+          <p class={`mt-3 text-xs ${p.destaque ? 'text-zinc-500' : 'text-zinc-500'}`}>Atendimento: Av. Brasil, 403 — Parque das Nações</p>
+        </div>
+      ))}
+    </div>
+    <p class="mt-6 text-center text-xs text-zinc-500">Valores e condições sujeitos à recepção. Sem taxas escondidas. Transparência total no fechamento.</p>
+  </div>
+</section>

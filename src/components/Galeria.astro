@@ -1,0 +1,40 @@
+---
+const pics = [
+  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1593079831268-3381b0db4a77?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?q=80&w=800&auto=format&fit=crop",
+];
+---
+<section id="galeria" class="bg-[#0F0F10] border-y border-white/10">
+  <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <div class="flex items-end justify-between gap-4">
+      <div>
+        <p class="text-xs font-bold tracking-[0.18em] text-[#F97316]">GALERIA DE FOTOS</p>
+        <h2 class="mt-2 text-[28px] sm:text-[36px] font-black tracking-tight text-white" style="font-family: Oswald, sans-serif">ESTRUTURA QUE IMPÕE RESPEITO</h2>
+        <p class="mt-2 max-w-[680px] text-sm leading-6 text-zinc-400">Salão amplo, equipamentos modernos e ambiente feito para performance. Conheça por dentro antes de vir treinar.</p>
+      </div>
+    </div>
+    <div class="mt-8 grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-3">
+      {pics.map((src) => (
+        <button class="group relative overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 text-left" data-lightbox={src} aria-label="Ampliar foto da academia">
+          <img src={src} alt="Foto da academia" class="h-[180px] sm:h-[220px] w-full object-cover group-hover:scale-[1.03] transition duration-500" loading="lazy" />
+          <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition"></span>
+        </button>
+      ))}
+    </div>
+  </div>
+  <div id="lb" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur">
+    <button id="lbClose" class="absolute right-4 top-4 h-10 w-10 rounded-full bg-white text-zinc-900 font-bold">✕</button>
+    <img id="lbImg" src="" alt="Foto ampliada" class="max-h-[86vh] max-w-[96vw] rounded-2xl object-contain shadow-2xl" />
+  </div>
+</section>
+<script is:inline>
+  const lb=document.getElementById('lb'), img=document.getElementById('lbImg'), close=document.getElementById('lbClose');
+  document.querySelectorAll('[data-lightbox]').forEach(b=>b.addEventListener('click',()=>{ img.src=b.getAttribute('data-lightbox'); lb.classList.remove('hidden'); lb.classList.add('flex'); }));
+  function hide(){ lb.classList.add('hidden'); lb.classList.remove('flex'); img.src=''; }
+  close&&close.addEventListener('click',hide); lb&&lb.addEventListener('click',e=>{ if(e.target===lb) hide(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') hide(); });
+</script>

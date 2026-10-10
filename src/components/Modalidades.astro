@@ -1,0 +1,38 @@
+---
+const WA = "https://wa.me/551194708842?text=Ol%C3%A1%20Academia!%20Quero%20saber%20mais%20e%20come%C3%A7ar%20a%20treinar.";
+const items = [
+  { title: 'Musculação', desc: 'Progressão com ficha personalizada, acompanhamento e correções técnicas em cada treino.', img: 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=800&auto=format&fit=crop' },
+  { title: 'Funcional & HIIT', desc: 'Alta queima calórica, condicionamento e agilidade com séries cronometradas.', img: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800&auto=format&fit=crop' },
+  { title: 'Cross & Força', desc: 'Força, potência e resistência com método e segurança.', img: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?q=80&w=800&auto=format&fit=crop' },
+  { title: 'Spinning / Bike', desc: 'Aulas guiadas com trilha e métricas para evoluir semana após semana.', img: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=800&auto=format&fit=crop' },
+  { title: 'Lutas & Defesa', desc: 'Disciplina, foco e condicionamento com instrutores graduados.', img: 'https://images.unsplash.com/photo-1555597673-b21d5c935865?q=80&w=800&auto=format&fit=crop' },
+  { title: 'Alongamento & Mobilidade', desc: 'Recuperação, postura e prevenção de lesões para treinar melhor.', img: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=800&auto=format&fit=crop' },
+];
+---
+<section id="modalidades" class="bg-[#0A0A0A] border-t border-white/10">
+  <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="text-xs font-bold tracking-[0.18em] text-[#F97316]">MODALIDADES</p>
+        <h2 class="mt-2 text-[30px] sm:text-[38px] font-black leading-none tracking-tight text-white" style="font-family: Oswald, sans-serif">TREINE DO SEU JEITO. <span class="text-zinc-500">EVOLUA TODO DIA.</span></h2>
+      </div>
+      <a href={WA} target="_blank" rel="noopener" class="hidden sm:inline-flex h-10 px-5 items-center justify-center rounded-full bg-white text-zinc-900 font-bold text-sm hover:bg-zinc-100">Entrar em contato</a>
+    </div>
+    <div class="mt-8 grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map(c => (
+        <article class="group overflow-hidden rounded-[20px] border border-white/10 bg-[#111113]">
+          <div class="relative h-[190px] overflow-hidden">
+            <img src={c.img} alt={c.title} class="h-full w-full object-cover group-hover:scale-[1.04] transition duration-500" loading="lazy" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+            <span class="absolute left-3 top-3 rounded-full bg-[#DC2626] px-3 py-1 text-[11px] font-extrabold tracking-wide text-white">ACADEMIA</span>
+          </div>
+          <div class="p-5">
+            <h3 class="text-[18px] font-black tracking-tight text-white" style="font-family: Oswald, sans-serif">{c.title}</h3>
+            <p class="mt-2 text-sm leading-6 text-zinc-400">{c.desc}</p>
+            <a href={WA} target="_blank" rel="noopener" class="mt-4 inline-flex text-sm font-bold text-white underline decoration-white/20 underline-offset-4 hover:decoration-white">Entrar em contato →</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

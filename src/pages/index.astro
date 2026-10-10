@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import Modalidades from '../components/Modalidades.astro';
+import Galeria from '../components/Galeria.astro';
+import Planos from '../components/Planos.astro';
+import Sobre from '../components/Sobre.astro';
+import ContactSection from '../components/ContactSection.astro';
+import Footer from '../components/Footer.astro';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
+---
+<BaseLayout title="Academia — Transforme corpo e mente | Santo André">
+  <Navbar slot="header" />
+  <Hero />
+  <Modalidades />
+  <Galeria />
+  <Planos />
+  <Sobre />
+  <ContactSection />
+  <Footer slot="footer" />
+  <FloatingWhatsApp />
+</BaseLayout>

@@ -1,0 +1,41 @@
+---
+const WA = "https://wa.me/551194708842?text=Ol%C3%A1%20Academia!%20Quero%20saber%20mais%20e%20come%C3%A7ar%20a%20treinar.";
+const nav = [
+  { label: 'Início', href: '#inicio' },
+  { label: 'Modalidades', href: '#modalidades' },
+  { label: 'Galeria', href: '#galeria' },
+  { label: 'Planos', href: '#planos' },
+  { label: 'Sobre', href: '#sobre' },
+  { label: 'Contato', href: '#contato' },
+];
+---
+<header class="fixed inset-x-0 top-0 z-40 border-b border-white/10 bg-[#0A0A0A]/80 backdrop-blur-xl">
+  <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 h-[64px] flex items-center justify-between gap-6">
+    <a href="#inicio" class="flex items-center gap-3 shrink-0">
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#DC2626] text-white font-black tracking-tight" style="font-family: Oswald, sans-serif">A</span>
+      <span class="hidden sm:block leading-none">
+        <span class="block text-[15px] font-bold tracking-[0.12em] text-white" style="font-family: Oswald, sans-serif">ACADEMIA</span>
+        <span class="block text-[10px] tracking-[0.18em] text-zinc-400 font-medium">TRANSFORME CORPO E MENTE</span>
+      </span>
+    </a>
+    <nav class="hidden lg:flex items-center gap-1 text-sm">
+      {nav.map(i => <a href={i.href} class="px-3 py-2 rounded-lg text-zinc-300 hover:text-white hover:bg-white/10 transition font-medium">{i.label}</a>)}
+    </nav>
+    <div class="flex items-center gap-2">
+      <a href={WA} target="_blank" rel="noopener" class="hidden sm:inline-flex h-10 px-5 items-center justify-center rounded-full bg-[#DC2626] hover:bg-[#B91C1C] text-white text-sm font-bold tracking-wide transition">Entrar em contato</a>
+      <a href={WA} target="_blank" rel="noopener" class="sm:hidden inline-flex h-10 px-4 items-center justify-center rounded-full bg-[#DC2626] text-white text-sm font-bold">Contato</a>
+      <button id="menuBtn" aria-label="Abrir menu" class="lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 text-white">☰</button>
+    </div>
+  </div>
+  <div id="mobileNav" class="hidden lg:hidden border-t border-white/10 bg-[#111113]">
+    <nav class="px-4 py-3 grid gap-1">
+      {nav.map(i => <a href={i.href} class="px-3 py-3 rounded-xl text-zinc-200 hover:bg-white/10">{i.label}</a>)}
+      <a href={WA} target="_blank" rel="noopener" class="mt-2 inline-flex h-11 items-center justify-center rounded-full bg-[#DC2626] text-white font-bold">Entrar em contato</a>
+    </nav>
+  </div>
+</header>
+<script is:inline>
+  const b=document.getElementById('menuBtn'), m=document.getElementById('mobileNav');
+  b&&m&&b.addEventListener('click',()=>m.classList.toggle('hidden'));
+  m&&m.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>m.classList.add('hidden')));
+</script>

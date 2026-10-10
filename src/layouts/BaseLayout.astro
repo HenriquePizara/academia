@@ -1,0 +1,32 @@
+---
+import '../styles/global.css';
+interface Props { title?: string; description?: string; }
+const { title = 'Academia — Transforme corpo e mente', description = 'Academia em Santo André. Estrutura completa, treinos orientados e resultado real. Entre em contato e comece hoje.' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site || 'https://academia.wbmonster.com.br');
+const schema = {
+  "@context":"https://schema.org","@type":"SportsActivityLocation",
+  name: "Academia", slogan: "Transforme corpo e mente",
+  url: canonical.toString(), telephone: "+55 11 9470-8842",
+  address: { "@type":"PostalAddress", streetAddress: "Av. Brasil, 403 - Parque das Nações", addressLocality:"Santo André", addressRegion:"SP", postalCode:"09210-280", addressCountry:"BR" }
+};
+---
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{title}</title><meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta property="og:type" content="website" /><meta property="og:title" content={title} /><meta property="og:description" content={description} /><meta property="og:url" content={canonical} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#DC2626" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline></script>
+</head>
+<body class="bg-[#0A0A0A] text-zinc-100 antialiased min-h-screen flex flex-col">
+<a href="#conteudo" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-zinc-900 focus:rounded-lg focus:font-semibold">Pular para o conteúdo</a>
+<slot name="header" />
+<main id="conteudo" class="flex-1"><slot /></main>
+<slot name="footer" />
+</body>
+</html>

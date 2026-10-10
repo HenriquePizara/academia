@@ -1,0 +1,45 @@
+---
+const WA = "https://wa.me/551194708842?text=Ol%C3%A1%20Academia!%20Quero%20saber%20mais%20e%20come%C3%A7ar%20a%20treinar.";
+---
+<section id="contato" class="bg-[#0A0A0A]">
+  <div class="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <div class="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
+      <div class="rounded-[22px] border border-white/10 bg-[#111113] p-6 sm:p-8">
+        <p class="text-xs font-bold tracking-[0.18em] text-[#F97316]">CONTATO</p>
+        <h2 class="mt-2 text-[26px] sm:text-[32px] font-black tracking-tight text-white" style="font-family: Oswald, sans-serif">FALE COM A RECEPÇÃO</h2>
+        <p class="mt-2 text-sm leading-6 text-zinc-400">Tire dúvidas sobre planos, horários e como começar. Atendimento direto no WhatsApp.</p>
+        <div class="mt-6 grid gap-3 text-sm">
+          <div class="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4"><span class="text-white">📍</span><div><p class="font-bold text-white">Endereço</p><p class="text-zinc-400">Av. Brasil, 403 - Parque das Nações, Santo André - SP, 09210-280</p><a href="https://www.google.com/maps/search/?api=1&query=Av.+Brasil+403+Parque+das+Na%C3%A7%C3%B5es+Santo+Andr%C3%A9+SP" target="_blank" rel="noopener" class="mt-2 inline-flex text-xs font-bold text-white underline decoration-white/20 underline-offset-4">Abrir no Maps →</a></div></div>
+          <div class="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4"><span class="text-white">💬</span><div><p class="font-bold text-white">WhatsApp / Telefone</p><p class="text-zinc-400">(01) 19470-8842</p><a href={WA} target="_blank" rel="noopener" class="mt-2 inline-flex h-9 px-4 items-center justify-center rounded-full bg-[#DC2626] text-white font-bold">Entrar em contato</a></div></div>
+        </div>
+      </div>
+      <form id="leadForm" class="rounded-[22px] border border-white/10 bg-white p-6 sm:p-7 text-zinc-900">
+        <h3 class="text-[18px] font-black tracking-tight" style="font-family: Oswald, sans-serif">ENVIE UMA MENSAGEM</h3>
+        <p class="mt-1 text-sm text-zinc-600">Resposta rápida no WhatsApp. Sem spam.</p>
+        <div class="mt-5 grid gap-4">
+          <label class="grid gap-1.5 text-sm font-semibold">Nome<input name="nome" required autocomplete="name" placeholder="Seu nome" class="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm outline-none focus:border-zinc-900" /></label>
+          <label class="grid gap-1.5 text-sm font-semibold">WhatsApp<input name="whatsapp" required inputmode="tel" placeholder="(11) 9 0000-0000" class="h-11 rounded-xl border border-zinc-200 bg-white px-3 text-sm outline-none focus:border-zinc-900" /></label>
+          <label class="grid gap-1.5 text-sm font-semibold">Mensagem<textarea name="mensagem" required rows="4" placeholder="Quero saber sobre planos e horários..." class="rounded-xl border border-zinc-200 bg-white p-3 text-sm outline-none focus:border-zinc-900"></textarea></label>
+          <button type="submit" class="h-12 rounded-full bg-[#DC2626] hover:bg-[#B91C1C] text-white font-extrabold tracking-wide transition">Entrar em contato</button>
+          <p id="formMsg" class="hidden rounded-xl bg-emerald-50 border border-emerald-200 px-3 py-2 text-sm text-emerald-800"></p>
+          <p class="text-xs leading-5 text-zinc-500">Ao enviar, você será redirecionado para o WhatsApp da Academia com sua mensagem preenchida.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+<script is:inline>
+  const form=document.getElementById('leadForm'), msg=document.getElementById('formMsg');
+  const WA_BASE="https://wa.me/551194708842";
+  form&&form.addEventListener('submit',e=>{
+    e.preventDefault();
+    const fd=new FormData(form);
+    const nome=(fd.get('nome')||'').toString().trim();
+    const zap=(fd.get('whatsapp')||'').toString().trim();
+    const texto=(fd.get('mensagem')||'').toString().trim();
+    if(!nome||!zap||!texto){ msg.textContent='Preencha nome, WhatsApp e mensagem.'; msg.classList.remove('hidden'); return; }
+    const body=encodeURIComponent(`Olá Academia! Sou ${nome} (${zap}). ${texto}`);
+    msg.textContent='Abrindo WhatsApp...'; msg.classList.remove('hidden');
+    window.open(`${WA_BASE}?text=${body}`,'_blank','noopener');
+  });
+</script>
