@@ -1,0 +1,66 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import StatCard from '../../components/app/StatCard.astro';
+import VolumeChart from '../../components/app/VolumeChart.astro';
+import FrequenciaChart from '../../components/app/FrequenciaChart.astro';
+import { getAuthUser } from '../../lib/auth';
+import { metricasEvolucao } from '../../lib/queries';
+
+const user = getAuthUser(Astro.cookies);
+if (!user) return Astro.redirect('/login', 302);
+
+const metricas = await metricasEvolucao(user.id, 8);
+const semanaAtual = metricas.semanas[metricas.semanas.length - 1] ?? { sessoes: 0, volume: 0 };
+const pico = Math.max(...metricas.evolucaoCarga.map((x) => x.ultimo), 1);
+---
+<AppLayout ativo="evolucao" title="Evolução | Academia">
+  <header class="mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white" style="font-family: Oswald, sans-serif">Sua evolução</h1>
+    <p class="mt-2 max-w-[60ch] text-zinc-300">
+      Como sua carga e sua frequência de treino evoluíram nas últimas 8 semanas.
+    </p>
+  </header>
+
+  <section aria-labelledby="titulo-kpi-evolucao" class="mb-8">
+    <h2 id="titulo-kpi-evolucao" class="sr-only">Resumo</h2>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard rotulo="Esta semana" valor={semanaAtual.sessoes + (semanaAtual.sessoes === 1 ? " sessão" : " sessões")} detalhe={semanaAtual.volume.toLocaleString("pt-BR") + " kg de volume"} destaque />
+      <StatCard rotulo="Sequência atual" valor={metricas.streak + " dias"} detalhe="sem quebrar a rotina" />
+      <StatCard rotulo="Volume médio" valor={metricas.volumeMedio.toLocaleString("pt-BR") + " kg"} detalhe="por semana ativa" />
+      <StatCard rotulo="Total no período" valor={metricas.volumeTotal.toLocaleString("pt-BR") + " kg"} detalhe={metricas.sessoesConcluidas + " sessões concluídas"} />
+    </div>
+  </section>
+
+  <div class="grid gap-4 lg:grid-cols-2">
+    <VolumeChart semanas={metricas.semanas} />
+    <FrequenciaChart semanas={metricas.semanas} />
+  </div>
+
+  <section aria-labelledby="titulo-carga" class="mt-8">
+    <h2 id="titulo-carga" class="mb-4 text-sm font-bold tracking-[0.14em] text-white uppercase">Progresso de carga por treino</h2>
+    {metricas.evolucaoCarga.length === 0 ? (
+      <p class="rounded-2xl border border-dashed border-white/15 px-6 py-12 text-center text-sm text-zinc-400">
+        Registre execuções com carga para comparar a evolução de cada treino.
+      </p>
+    ) : (
+      <ul class="space-y-3">
+        {metricas.evolucaoCarga.map((e) => (
+          <li class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <div class="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 class="font-bold text-white">{e.treinoNome}</h3>
+              <p class={"text-sm font-semibold tabular-nums " + (e.variacao > 0 ? "text-emerald-400" : "text-zinc-400")}>
+                {e.variacao > 0 ? "+" : ""}{e.variacao.toLocaleString("pt-BR")} kg
+              </p>
+            </div>
+            <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
+              <div class="h-full rounded-full bg-[#DC2626]" style={"width:" + Math.round((e.ultimo / pico) * 100) + "%"}></div>
+            </div>
+            <p class="mt-2 text-sm text-zinc-400 tabular-nums">
+              {e.primeiro.toLocaleString("pt-BR")} kg → {e.ultimo.toLocaleString("pt-BR")} kg em {e.pontos.length} sessões
+            </p>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+</AppLayout>

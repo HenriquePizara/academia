@@ -1,0 +1,64 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  ativo?: 'treino' | 'evolucao' | 'historico' | 'anamnese';
+}
+
+const { title = 'Minha conta | Academia', ativo } = Astro.props;
+
+const abas = [
+  { id: 'treino', label: 'Meus treinos', href: '/app' },
+  { id: 'evolucao', label: 'Evolução', href: '/app/evolucao' },
+  { id: 'historico', label: 'Histórico', href: '/app/historico' },
+  { id: 'anamnese', label: 'Anamnese', href: '/app/anamnese' },
+];
+---
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>{title}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+</head>
+<body class="bg-[#0A0A0A] text-zinc-100 antialiased min-h-screen">
+<a href="#conteudo" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-zinc-900 focus:rounded-lg focus:font-semibold">Pular para o conteúdo</a>
+<header class="sticky top-0 z-40 border-b border-white/10 bg-[#0A0A0A]/85 backdrop-blur-xl">
+  <div class="mx-auto max-w-[1120px] px-4 sm:px-6 h-[60px] flex items-center justify-between gap-4">
+    <a href="/app" class="flex items-center gap-2.5 shrink-0">
+      <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#DC2626] text-white font-black" style="font-family: Oswald, sans-serif">A</span>
+      <span class="hidden sm:block text-sm font-bold tracking-[0.12em] text-white" style="font-family: Oswald, sans-serif">MEU TREINO</span>
+    </a>
+    <nav aria-label="Seções da conta" class="flex items-center gap-1 overflow-x-auto">
+      {abas.map((a) => (
+        <a
+          href={a.href}
+          aria-current={ativo === a.id ? 'page' : undefined}
+          class:list={[
+            'shrink-0 rounded-lg px-3 py-2 text-sm font-medium transition',
+            ativo === a.id ? 'bg-white/10 text-white' : 'text-zinc-400 hover:text-white hover:bg-white/5',
+          ]}
+        >
+          {a.label}
+        </a>
+      ))}
+    </nav>
+    <button id="logout-btn" type="button" class="shrink-0 h-9 px-3 rounded-lg border border-white/15 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition">
+      Sair
+    </button>
+  </div>
+</header>
+<main id="conteudo" class="mx-auto max-w-[1120px] px-4 sm:px-6 py-8 sm:py-12">
+  <slot />
+</main>
+<script is:inline>
+  document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/';
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import { getAuthUser } from '../../lib/auth';
+import { historicoExecucoes } from '../../lib/queries';
+
+const user = getAuthUser(Astro.cookies);
+if (!user) return Astro.redirect('/login', 302);
+
+const historico = await historicoExecucoes(user.id, 60);
+
+const fmt = (iso: string) =>
+  new Date(iso + "T12:00:00Z").toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
+const concluidos = historico.filter((h) => h.concluido);
+const total = concluidos.reduce((a, h) => a + Number(h.cargaReal ?? 0), 0);
+---
+<AppLayout ativo="historico" title="Histórico | Academia">
+  <header class="mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white" style="font-family: Oswald, sans-serif">Histórico de treinos</h1>
+    <p class="mt-2 max-w-[60ch] text-zinc-300">
+      Cada sessão registrada, com a carga que você carregou e como você se sentiu.
+    </p>
+  </header>
+
+  {historico.length > 0 && (
+    <dl class="mb-8 flex flex-wrap gap-x-10 gap-y-3 text-sm">
+      <div>
+        <dt class="text-zinc-400">Sessões</dt>
+        <dd class="text-2xl font-bold text-white tabular-nums">{concluidos.length}</dd>
+      </div>
+      <div>
+        <dt class="text-zinc-400">Volume acumulado</dt>
+        <dd class="text-2xl font-bold text-white tabular-nums">{total.toLocaleString("pt-BR")} kg</dd>
+      </div>
+    </dl>
+  )}
+
+  {historico.length === 0 ? (
+    <div class="rounded-2xl border border-dashed border-white/15 px-6 py-14 text-center">
+      <h2 class="text-lg font-bold text-white">Nenhuma sessão registrada</h2>
+      <p class="mt-2 mx-auto max-w-[46ch] text-sm leading-6 text-zinc-400">
+        Quando você concluir um treino pela ficha, ele aparece aqui automaticamente.
+      </p>
+      <a href="/app" class="mt-6 inline-flex h-12 items-center justify-center rounded-lg bg-[#DC2626] px-6 text-sm font-bold text-white hover:bg-[#B91C1C] transition">
+        Ver meus treinos
+      </a>
+    </div>
+  ) : (
+    <ul class="space-y-3">
+      {historico.map((h) => (
+        <li class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="font-bold text-white">{h.treinoNome}</h3>
+                <span class={"rounded-full border px-2.5 py-0.5 text-xs font-semibold " + (h.concluido ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-white/15 bg-white/5 text-zinc-400")}>
+                  {h.concluido ? "Concluído" : "Incompleto"}
+                </span>
+              </div>
+              <p class="mt-1 text-sm text-zinc-400 tabular-nums">{fmt(h.dataExecucao)}</p>
+              {h.observacao && <p class="mt-2 text-sm leading-5 text-zinc-300">“{h.observacao}”</p>}
+            </div>
+            <div class="shrink-0 text-right">
+              <p class="text-xs tracking-wide text-zinc-400 uppercase">Volume</p>
+              <p class="text-xl font-bold text-white tabular-nums">
+                {h.cargaReal ? Number(h.cargaReal).toLocaleString("pt-BR") + " kg" : "—"}
+              </p>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ul>
+  )}
+</AppLayout>

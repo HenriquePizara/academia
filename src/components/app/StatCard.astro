@@ -1,0 +1,17 @@
+---
+interface Props {
+  rotulo: string;
+  valor: string | number;
+  detalhe?: string;
+  destaque?: boolean;
+}
+const { rotulo, valor, detalhe, destaque = false } = Astro.props;
+---
+<div class:list={[
+  'rounded-2xl border p-5',
+  destaque ? 'border-[#DC2626]/40 bg-[#DC2626]/[0.07]' : 'border-white/10 bg-white/[0.03]',
+]}>
+  <p class="text-xs font-medium tracking-[0.14em] text-zinc-400 uppercase">{rotulo}</p>
+  <p class="mt-2 text-3xl font-bold tabular-nums tracking-tight text-white">{valor}</p>
+  {detalhe && <p class="mt-1 text-sm text-zinc-400">{detalhe}</p>}
+</div>

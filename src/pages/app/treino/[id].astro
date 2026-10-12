@@ -1,0 +1,64 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import TreinoSheet from '../../../components/app/TreinoSheet.tsx';
+import { getAuthUser } from '../../../lib/auth';
+import { getTreinoCompleto, hojeISO } from '../../../lib/queries';
+import { and, eq } from 'drizzle-orm';
+import { db, schema } from '../../../db/client';
+
+const user = getAuthUser(Astro.cookies);
+if (!user) return Astro.redirect('/login', 302);
+
+const resultado = await getTreinoCompleto(Astro.params.id ?? "", user.id);
+if (!resultado) return Astro.redirect('/app', 302);
+
+const { treino, itens, personal, ultimaExecucao } = resultado;
+
+const [registroHoje] = await db
+  .select({ id: schema.execucoes.id })
+  .from(schema.execucoes)
+  .where(
+    and(
+      eq(schema.execucoes.treinoId, treino.id),
+      eq(schema.execucoes.alunoId, user.id),
+      eq(schema.execucoes.dataExecucao, hojeISO()),
+      eq(schema.execucoes.concluido, true),
+    ),
+  )
+  .limit(1);
+
+const fmt = (iso: string) =>
+  new Date(iso + "T12:00:00Z").toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    timeZone: "UTC",
+  });
+---
+<AppLayout ativo="treino" title={treino.nome + " | Academia"}>
+  <nav aria-label="Trilha" class="mb-6">
+    <a href="/app" class="text-sm text-zinc-400 hover:text-white transition">← Voltar para meus treinos</a>
+  </nav>
+
+  <header class="mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white" style="font-family: Oswald, sans-serif">
+      {treino.nome}
+    </h1>
+    <p class="mt-2 text-zinc-300">
+      {itens.length} exercícios · prescrito por {personal?.nome ?? "seu personal"}
+      {personal?.cref && <span class="text-zinc-400"> (CREF {personal.cref})</span>}
+    </p>
+    {treino.observacoes && (
+      <p class="mt-3 max-w-[62ch] rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm leading-6 text-zinc-300">
+        {treino.observacoes}
+      </p>
+    )}
+    {ultimaExecucao?.concluido && (
+      <p class="mt-3 text-sm text-zinc-400 tabular-nums">
+        Última sessão: {fmt(ultimaExecucao.dataExecucao)}
+        {ultimaExecucao.cargaReal && " · " + Number(ultimaExecucao.cargaReal).toLocaleString("pt-BR") + " kg"}
+      </p>
+    )}
+  </header>
+
+  <TreinoSheet client:load treinoId={treino.id} itens={itens} registroHoje={Boolean(registroHoje)} />
+</AppLayout>

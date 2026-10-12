@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+import RegisterForm from '../components/RegisterForm.tsx';
+
+if (Astro.cookies.get('academia_token')) {
+  return Astro.redirect('/app', 302);
+}
+---
+
+<BaseLayout title="Criar conta | Academia">
+  <main class="flex-1 flex items-center justify-center px-4 py-16">
+    <div class="w-full max-w-[420px]">
+      <div class="text-center mb-8">
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#DC2626] text-white text-2xl font-black" style="font-family: Oswald, sans-serif">A</span>
+        <h1 class="mt-4 text-2xl font-black tracking-tight text-white" style="font-family: Oswald, sans-serif">Crie sua conta</h1>
+        <p class="mt-2 text-sm text-zinc-400">Comece a treinar com acompanhamento profissional.</p>
+      </div>
+      <RegisterForm />
+    </div>
+  </main>
+  <Footer slot="footer" />
+</BaseLayout>

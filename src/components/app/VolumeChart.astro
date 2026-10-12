@@ -1,0 +1,70 @@
+---
+interface Props {
+  semanas: { inicio: string; volume: number; sessoes: number }[];
+}
+const { semanas } = Astro.props;
+
+const max = Math.max(...semanas.map((s) => s.volume), 1);
+const altura = 44;
+const passo = semanas.length > 1 ? 100 / (semanas.length - 1) : 100;
+
+const pontos = semanas.map((s, i) => ({
+  ...s,
+  x: Number((i * passo).toFixed(2)),
+  y: Number((altura - (s.volume / max) * (altura - 6) - 3).toFixed(2)),
+}));
+
+const coords = pontos.map((p) => p.x + ',' + p.y).join(' ');
+const area =
+  pontos.length > 1
+    ? 'M0,' + altura + ' L' + coords.replaceAll(' ', ' L') + ' L100,' + altura + ' Z'
+    : '';
+
+const fmt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', timeZone: 'UTC' });
+const rotulo = (iso: string) => fmt.format(new Date(iso + 'T12:00:00Z'));
+
+const total = semanas.reduce((a, s) => a + s.volume, 0);
+---
+<section aria-labelledby="titulo-volume" class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <h2 id="titulo-volume" class="text-sm font-bold tracking-[0.14em] text-white uppercase">Volume por semana</h2>
+    <p class="text-sm text-zinc-400 tabular-nums">{total.toLocaleString('pt-BR')} kg no período</p>
+  </div>
+
+  {total === 0 ? (
+    <p class="mt-6 rounded-xl border border-dashed border-white/15 px-4 py-10 text-center text-sm text-zinc-400">
+      Registre a primeira execução de um treino para o volume aparecer aqui.
+    </p>
+  ) : (
+    <>
+      <svg
+        viewBox={'0 0 100 ' + altura}
+        class="mt-5 h-32 w-full overflow-visible"
+        preserveAspectRatio="none"
+        role="img"
+        aria-label={'Volume semanal de treino: ' + total.toLocaleString('pt-BR') + ' quilogramas em ' + semanas.length + ' semanas'}
+      >
+        <defs>
+          <linearGradient id="preenche-volume" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#DC2626" stop-opacity="0.32"></stop>
+            <stop offset="100%" stop-color="#DC2626" stop-opacity="0.02"></stop>
+          </linearGradient>
+        </defs>
+        <line x1="0" y1={altura} x2="100" y2={altura} stroke="#ffffff" stroke-opacity="0.14" stroke-width="0.4"></line>
+        <path d={area} fill="url(#preenche-volume)"></path>
+        <polyline points={coords} fill="none" stroke="#DC2626" stroke-width="0.9" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></polyline>
+        {pontos.map((p) => (
+          <circle cx={p.x} cy={p.y} r="0.9" fill="#0A0A0A" stroke="#F87171" stroke-width="0.6" vector-effect="non-scaling-stroke"></circle>
+        ))}
+      </svg>
+      <ul class="mt-3 flex justify-between gap-1 text-[10px] text-zinc-500 tabular-nums">
+        {pontos.map((p, i) => (
+          <li class:list={[i > 0 && i < pontos.length - 1 ? 'hidden sm:block' : '']}>
+            <span class="block font-medium text-zinc-300">{p.volume ? p.volume.toLocaleString('pt-BR') + ' kg' : '—'}</span>
+            <span>{rotulo(p.inicio)}</span>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</section>

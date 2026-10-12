@@ -1,0 +1,38 @@
+---
+import AppLayout from '../../layouts/AppLayout.astro';
+import AnamneseForm from '../../components/app/AnamneseForm.tsx';
+import { getAuthUser } from '../../lib/auth';
+import { getAnamnese } from '../../lib/queries';
+
+const user = getAuthUser(Astro.cookies);
+if (!user) return Astro.redirect('/login', 302);
+
+const anamnese = await getAnamnese(user.id);
+const respostas = (anamnese?.respostas ?? null) as Record<string, string> | null;
+
+const preenchida = Boolean(respostas?.objetivo && respostas?.nivelTreino);
+---
+<AppLayout ativo="anamnese" title="Anamnese | Academia">
+  <header class="mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white" style="font-family: Oswald, sans-serif">Anamnese</h1>
+    <p class="mt-2 max-w-[62ch] text-zinc-300">
+      Essas informações ajudam seu personal a montar um treino seguro para o seu corpo. Preencha apenas o que se aplica.
+    </p>
+  </header>
+
+  <div class="mb-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+    <h2 class="text-sm font-bold text-white">Como tratamos seus dados de saúde</h2>
+    <ul class="mt-3 grid gap-2 text-sm leading-6 text-zinc-300">
+      <li class="flex gap-2"><span class="text-[#F87171]" aria-hidden="true">—</span> Ficam visíveis apenas para você e para o personal trainer responsável.</li>
+      <li class="flex gap-2"><span class="text-[#F87171]" aria-hidden="true">—</span> Não são compartilhados com terceiros nem usados para publicidade.</li>
+      <li class="flex gap-2"><span class="text-[#F87171]" aria-hidden="true">—</span> Você pode revisar, corrigir ou apagar tudo a qualquer momento.</li>
+    </ul>
+    <p class="mt-3 text-sm text-zinc-400">
+      Status: {preenchida ? <span class="font-semibold text-emerald-400">anamnese preenchida</span> : <span class="text-zinc-300">ainda não preenchida</span>}
+    </p>
+  </div>
+
+  <div class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
+    <AnamneseForm client:load inicial={respostas} />
+  </div>
+</AppLayout>

@@ -115,7 +115,7 @@ export const execucoes = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     dataExecucao: date('data_execucao').notNull(),
     concluido: boolean('concluido').notNull().default(false),
-    cargaReal: numeric('carga_real', { precision: 8, scale: 2 }),
+    cargaReal: numeric('carga_real', { precision: 10, scale: 2 }),
     observacao: text('observacao'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

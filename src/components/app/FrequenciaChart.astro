@@ -1,0 +1,44 @@
+---
+interface Props { semanas: { inicio: string; volume: number; sessoes: number }[] }
+const { semanas } = Astro.props;
+
+const max = Math.max(...semanas.map((s) => s.sessoes), 4);
+const alturaPx = 96;
+
+const rotulo = (iso: string) =>
+  new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', timeZone: 'UTC' }).format(
+    new Date(iso + 'T12:00:00Z'),
+  );
+
+const total = semanas.reduce((a, s) => a + s.sessoes, 0);
+---
+<section aria-labelledby="titulo-freq" class="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+  <div class="flex flex-wrap items-baseline justify-between gap-2">
+    <h2 id="titulo-freq" class="text-sm font-bold tracking-[0.14em] text-white uppercase">Sessões por semana</h2>
+    <p class="text-sm text-zinc-400 tabular-nums">{total} no período</p>
+  </div>
+  <p class="mt-1 text-sm text-zinc-400">Meta de constância: 3 a 4 sessões por semana.</p>
+
+  {total === 0 ? (
+    <p class="mt-6 rounded-xl border border-dashed border-white/15 px-4 py-10 text-center text-sm text-zinc-400">
+      Nenhuma sessão concluída ainda neste período.
+    </p>
+  ) : (
+    <div class="mt-6 flex items-end gap-1.5" role="img" aria-label={'Sessões concluídas por semana, total de ' + total}>
+      {semanas.map((s) => {
+        const h = s.sessoes === 0 ? 4 : Math.max(10, Math.round((s.sessoes / max) * alturaPx));
+        const bom = s.sessoes >= 3;
+        return (
+          <div class="flex flex-1 flex-col items-center gap-2">
+            <span class="text-xs font-semibold text-zinc-300 tabular-nums">{s.sessoes}</span>
+            <div
+              class="w-full rounded-t-md"
+              style={'height:' + h + 'px;background:' + (bom ? '#DC2626' : 'rgba(255,255,255,0.16)')}
+            ></div>
+            <span class="text-[10px] text-zinc-500 tabular-nums">{rotulo(s.inicio)}</span>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</section>
