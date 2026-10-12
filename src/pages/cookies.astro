@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+---
+<BaseLayout title="Política de Cookies | Academia">
+  <article class="mx-auto max-w-[820px] px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white" style="font-family: Oswald, sans-serif">Política de Cookies</h1>
+    <p class="mt-2 text-sm text-zinc-500">Última atualização: 11 de outubro de 2026</p>
+    <div class="mt-8 space-y-6 text-sm leading-7 text-zinc-300">
+      <section>
+        <h2 class="text-lg font-bold text-white">1. O que são cookies</h2>
+        <p>Cookies são pequenos arquivos de texto armazenados no seu dispositivo que ajudam a melhorar sua experiência e lembrar suas preferências.</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">2. Tipos de cookies que utilizamos</h2>
+        <ul class="list-disc pl-6 space-y-2">
+          <li><strong class="text-white">Essenciais:</strong> necessários para o funcionamento do site (ex.: sessão, autenticação). Não podem ser desativados.</li>
+          <li><strong class="text-white">Analíticos/Desempenho:</strong> nos ajudam a entender como você usa o site para melhorar a experiência. Coletados apenas com seu consentimento.</li>
+          <li><strong class="text-white">Marketing/Publicidade:</strong> utilizados para exibir anúncios relevantes. Ativados apenas com seu consentimento explícito.</li>
+        </ul>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">3. Gerenciamento</h2>
+        <p>Você pode ativar ou desativar cookies não essenciais a qualquer momento pelo banner de consentimento no site ou diretamente nas configurações do seu navegador.</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">4. Cookies de terceiros</h2>
+        <p>Utilizamos cookies de terceiros apenas para análise de tráfego (Google Analytics) e processamento de pagamento, sempre com anonimização de IP e sem compartilhamento de dados pessoais para publicidade.</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">5. Mais informações</h2>
+        <p>Para dúvidas sobre cookies, entre em contato pelo e-mail <a href="mailto:contato@wbmonster.com.br" class="text-white underline">contato@wbmonster.com.br</a> ou WhatsApp <a href="https://wa.me/5511976729229" target="_blank" rel="noopener" class="text-white underline">(11) 97672-9229</a>.</p>
+      </section>
+    </div>
+  </article>
+  <Footer slot="footer" />
+</BaseLayout>

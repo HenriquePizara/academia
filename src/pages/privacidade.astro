@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+---
+<BaseLayout title="Política de Privacidade | Academia">
+  <article class="mx-auto max-w-[820px] px-4 sm:px-6 lg:px-8 py-16">
+    <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-white" style="font-family: Oswald, sans-serif">Política de Privacidade</h1>
+    <p class="mt-2 text-sm text-zinc-500">Última atualização: 11 de outubro de 2026</p>
+    <div class="mt-8 space-y-6 text-sm leading-7 text-zinc-300">
+      <section>
+        <h2 class="text-lg font-bold text-white">1. Dados que coletamos</h2>
+        <p>Coletamos apenas os dados necessários para a operação do serviço: nome, e-mail, telefone e dados de anamnese (saúde) quando você se cadastra. Não coletamos dados além do necessário (LGPD Art. 6º, III).</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">2. Base legal</h2>
+        <p>O tratamento de dados pessoais é realizado com base no Art. 7º da LGPD (Lei 13.709/2018), mediante consentimento do titular para dados pessoais e execução de contrato para dados de anamnese.</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">3. Finalidade</h2>
+        <p>Os dados são utilizados exclusivamente para: gestão de matrículas, elaboração de treinos personalizados, comunicação sobre horários e planos, e cumprimento de obrigações legais (ex.: SNGPC, quando aplicável).</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">4. Compartilhamento</h2>
+        <p>Não compartilhamos dados pessoais com terceiros, exceto quando exigido por lei ou ordem judicial. Dados de anamnese são acessíveis apenas pelo personal trainer responsável.</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">5. Retenção</h2>
+        <p>Os dados são mantidos pelo período necessário à prestação do serviço e cumprimento de obrigações legais. Após esse prazo, são excluídos ou anonimizados.</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">6. Seus direitos (LGPD Art. 18)</h2>
+        <p>Você pode solicitar a qualquer momento: confirmação de tratamento, acesso, correção, anonimização, portabilidade, eliminação e revogação do consentimento. Para exercer seus direitos, entre em contato pelo e-mail <a href="mailto:contato@wbmonster.com.br" class="text-white underline">contato@wbmonster.com.br</a> ou WhatsApp <a href="https://wa.me/5511976729229" target="_blank" rel="noopener" class="text-white underline">(11) 97672-9229</a>.</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">7. Segurança</h2>
+        <p>Utilizamos criptografia em trânsito (TLS 1.3) e em repouso (AES-256), controle de acesso por papéis (admin, personal, aluno) e trilha de auditoria para proteger seus dados.</p>
+      </section>
+      <section>
+        <h2 class="text-lg font-bold text-white">8. Encarregado (DPO)</h2>
+        <p>O Encarregado de Dados da WbMonster pode ser contatado em <a href="mailto:contato@wbmonster.com.br" class="text-white underline">contato@wbmonster.com.br</a>.</p>
+      </section>
+    </div>
+  </article>
+  <Footer slot="footer" />
+</BaseLayout>
