@@ -33,5 +33,26 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   context.locals.user = user;
+
+  const isTrainer = user.role === 'personal' || user.role === 'admin';
+
+  // Guardrail de rotas exclusivas do personal
+  if (pathname.startsWith('/app/personal') || pathname.startsWith('/api/personal')) {
+    if (!isTrainer) {
+      if (pathname.startsWith('/api/')) {
+        return new Response(JSON.stringify({ error: 'Acesso restrito a treinadores' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return context.redirect('/app', 302);
+    }
+  }
+
+  // Redireciona personal da rota geral /app diretamente para /app/personal
+  if (pathname === '/app' && isTrainer) {
+    return context.redirect('/app/personal', 302);
+  }
+
   return next();
 });

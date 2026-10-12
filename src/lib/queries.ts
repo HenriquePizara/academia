@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, inArray, sql as dsql } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, or, sql as dsql } from 'drizzle-orm';
 import { db, schema } from '../db/client';
 
 export const GRUPO_LABEL: Record<string, string> = {
@@ -252,3 +252,194 @@ export async function salvarAnamnese(alunoId: string, respostas: Record<string, 
     .returning();
   return row;
 }
+
+export async function listarAlunosDoPersonal(personalId: string) {
+  const alunos = await db
+    .select({
+      id: schema.users.id,
+      nome: schema.users.nome,
+      email: schema.users.email,
+      avatarUrl: schema.users.avatarUrl,
+      createdAt: schema.users.createdAt,
+    })
+    .from(schema.users)
+    .where(
+      and(
+        eq(schema.users.role, 'aluno'),
+        or(eq(schema.users.personalId, personalId), isNull(schema.users.personalId)),
+      ),
+    )
+    .orderBy(schema.users.nome);
+
+  if (alunos.length === 0) return [];
+
+  const alunoIds = alunos.map((a) => a.id);
+
+  const [anamnesesRows, treinosRows, execucoesRows] = await Promise.all([
+    db
+      .select({ alunoId: schema.anamneses.alunoId, updatedAt: schema.anamneses.updatedAt })
+      .from(schema.anamneses)
+      .where(inArray(schema.anamneses.alunoId, alunoIds)),
+    db
+      .select({
+        id: schema.treinos.id,
+        alunoId: schema.treinos.alunoId,
+        nome: schema.treinos.nome,
+      })
+      .from(schema.treinos)
+      .where(inArray(schema.treinos.alunoId, alunoIds)),
+    db
+      .select({
+        alunoId: schema.execucoes.alunoId,
+        dataExecucao: schema.execucoes.dataExecucao,
+        concluido: schema.execucoes.concluido,
+      })
+      .from(schema.execucoes)
+      .where(inArray(schema.execucoes.alunoId, alunoIds))
+      .orderBy(desc(schema.execucoes.dataExecucao)),
+  ]);
+
+  const anamnesesSet = new Map(anamnesesRows.map((a) => [a.alunoId, a.updatedAt]));
+
+  return alunos.map((a) => {
+    const doAlunoTreinos = treinosRows.filter((t) => t.alunoId === a.id);
+    const doAlunoExecucoes = execucoesRows.filter((e) => e.alunoId === a.id && e.concluido);
+    return {
+      ...a,
+      totalTreinos: doAlunoTreinos.length,
+      treinos: doAlunoTreinos,
+      totalSessoes: doAlunoExecucoes.length,
+      ultimaSessao: doAlunoExecucoes[0]?.dataExecucao ?? null,
+      temAnamnese: anamnesesSet.has(a.id),
+      anamneseAtualizadaEm: anamnesesSet.get(a.id) ?? null,
+    };
+  });
+}
+
+export async function getAlunoDetalhes(alunoId: string, personalId: string) {
+  const [aluno] = await db
+    .select({
+      id: schema.users.id,
+      nome: schema.users.nome,
+      email: schema.users.email,
+      avatarUrl: schema.users.avatarUrl,
+      cref: schema.users.cref,
+      createdAt: schema.users.createdAt,
+    })
+    .from(schema.users)
+    .where(
+      and(
+        eq(schema.users.id, alunoId),
+        eq(schema.users.role, 'aluno'),
+        or(eq(schema.users.personalId, personalId), isNull(schema.users.personalId)),
+      ),
+    )
+    .limit(1);
+
+  if (!aluno) return null;
+
+  const [anamnese, treinos, ultimasExecucoes] = await Promise.all([
+    db
+      .select()
+      .from(schema.anamneses)
+      .where(eq(schema.anamneses.alunoId, alunoId))
+      .limit(1),
+    listarTreinosDoAluno(alunoId),
+    historicoExecucoes(alunoId, 10),
+  ]);
+
+  return {
+    aluno,
+    anamnese: anamnese[0] ?? null,
+    treinos,
+    ultimasExecucoes,
+  };
+}
+
+export async function listarExerciciosCatalogo(grupo?: string) {
+  const q = db.select().from(schema.exercicios);
+
+  if (grupo && grupo !== 'todos') {
+    return q
+      .where(eq(schema.exercicios.grupoMuscular, grupo as any))
+      .orderBy(schema.exercicios.nome);
+  }
+
+  return q.orderBy(schema.exercicios.grupoMuscular, schema.exercicios.nome);
+}
+
+export interface SalvarTreinoInput {
+  id?: string;
+  nome: string;
+  alunoId: string;
+  personalId: string;
+  observacoes?: string | null;
+  itens: Array<{
+    exercicioId: string;
+    series: number;
+    repeticoes: string;
+    carga?: number | null;
+    descansoSegundos?: number | null;
+    ordem: number;
+  }>;
+}
+
+export async function salvarTreinoComExercicios(dados: SalvarTreinoInput) {
+  let treinoId = dados.id;
+
+  if (treinoId) {
+    const [atualizado] = await db
+      .update(schema.treinos)
+      .set({
+        nome: dados.nome,
+        alunoId: dados.alunoId,
+        observacoes: dados.observacoes ?? null,
+        updatedAt: dsql`now()`,
+      })
+      .where(and(eq(schema.treinos.id, treinoId), eq(schema.treinos.personalId, dados.personalId)))
+      .returning();
+
+    if (!atualizado) throw new Error('Treino não encontrado ou não autorizado');
+
+    await db
+      .delete(schema.treinoExercicios)
+      .where(eq(schema.treinoExercicios.treinoId, treinoId));
+  } else {
+    const [novo] = await db
+      .insert(schema.treinos)
+      .values({
+        nome: dados.nome,
+        alunoId: dados.alunoId,
+        personalId: dados.personalId,
+        observacoes: dados.observacoes ?? null,
+      })
+      .returning();
+
+    treinoId = novo.id;
+  }
+
+  if (dados.itens.length > 0) {
+    await db.insert(schema.treinoExercicios).values(
+      dados.itens.map((item, idx) => ({
+        treinoId: treinoId!,
+        exercicioId: item.exercicioId,
+        series: item.series ?? 3,
+        repeticoes: item.repeticoes || '10-12',
+        carga: item.carga !== undefined && item.carga !== null ? String(item.carga) : null,
+        descansoSegundos: item.descansoSegundos ?? 60,
+        ordem: item.ordem ?? idx,
+      })),
+    );
+  }
+
+  return { id: treinoId };
+}
+
+export async function excluirTreino(treinoId: string, personalId: string) {
+  const [removido] = await db
+    .delete(schema.treinos)
+    .where(and(eq(schema.treinos.id, treinoId), eq(schema.treinos.personalId, personalId)))
+    .returning({ id: schema.treinos.id });
+  return removido ?? null;
+}
+

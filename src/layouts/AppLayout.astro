@@ -3,17 +3,36 @@ import '../styles/global.css';
 
 interface Props {
   title?: string;
-  ativo?: 'treino' | 'evolucao' | 'historico' | 'anamnese';
+  ativo?:
+    | 'treino'
+    | 'evolucao'
+    | 'historico'
+    | 'anamnese'
+    | 'personal_alunos'
+    | 'personal_novo'
+    | 'personal_exercicios';
 }
 
 const { title = 'Minha conta | Academia', ativo } = Astro.props;
+const user = Astro.locals.user;
+const isPersonal = user?.role === 'personal' || user?.role === 'admin';
 
-const abas = [
+const abasAluno = [
   { id: 'treino', label: 'Meus treinos', href: '/app' },
   { id: 'evolucao', label: 'Evolução', href: '/app/evolucao' },
   { id: 'historico', label: 'Histórico', href: '/app/historico' },
   { id: 'anamnese', label: 'Anamnese', href: '/app/anamnese' },
 ];
+
+const abasPersonal = [
+  { id: 'personal_alunos', label: 'Alunos', href: '/app/personal' },
+  { id: 'personal_novo', label: 'Prescrever Treino', href: '/app/personal/treino/novo' },
+  { id: 'personal_exercicios', label: 'Catálogo de Exercícios', href: '/app/personal/exercicios' },
+];
+
+const abas = isPersonal ? abasPersonal : abasAluno;
+const homeHref = isPersonal ? '/app/personal' : '/app';
+const brandLabel = isPersonal ? 'PAINEL DO PERSONAL' : 'MEU TREINO';
 ---
 <!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">
@@ -28,9 +47,9 @@ const abas = [
 <a href="#conteudo" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-zinc-900 focus:rounded-lg focus:font-semibold">Pular para o conteúdo</a>
 <header class="sticky top-0 z-40 border-b border-white/10 bg-[#0A0A0A]/85 backdrop-blur-xl">
   <div class="mx-auto max-w-[1120px] px-4 sm:px-6 h-[60px] flex items-center justify-between gap-4">
-    <a href="/app" class="flex items-center gap-2.5 shrink-0">
+    <a href={homeHref} class="flex items-center gap-2.5 shrink-0">
       <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#DC2626] text-white font-black" style="font-family: Oswald, sans-serif">A</span>
-      <span class="hidden sm:block text-sm font-bold tracking-[0.12em] text-white" style="font-family: Oswald, sans-serif">MEU TREINO</span>
+      <span class="hidden sm:block text-sm font-bold tracking-[0.12em] text-white" style="font-family: Oswald, sans-serif">{brandLabel}</span>
     </a>
     <nav aria-label="Seções da conta" class="flex items-center gap-1 overflow-x-auto">
       {abas.map((a) => (
@@ -46,9 +65,16 @@ const abas = [
         </a>
       ))}
     </nav>
-    <button id="logout-btn" type="button" class="shrink-0 h-9 px-3 rounded-lg border border-white/15 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition">
-      Sair
-    </button>
+    <div class="flex items-center gap-2 shrink-0">
+      {user && (
+        <span class="hidden md:inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-white/10 text-zinc-300">
+          {user.nome.split(' ')[0]} {isPersonal ? '• CREF' : ''}
+        </span>
+      )}
+      <button id="logout-btn" type="button" class="shrink-0 h-9 px-3 rounded-lg border border-white/15 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition">
+        Sair
+      </button>
+    </div>
   </div>
 </header>
 <main id="conteudo" class="mx-auto max-w-[1120px] px-4 sm:px-6 py-8 sm:py-12">

@@ -1,0 +1,99 @@
+---
+import AppLayout from '../../../layouts/AppLayout.astro';
+import { getAuthUser } from '../../../lib/auth';
+import { listarExerciciosCatalogo, GRUPO_LABEL } from '../../../lib/queries';
+
+const user = getAuthUser(Astro.cookies);
+if (!user || (user.role !== 'personal' && user.role !== 'admin')) {
+  return Astro.redirect('/app', 302);
+}
+
+const grupoParam = Astro.url.searchParams.get('grupo') || 'todos';
+const exercicios = await listarExerciciosCatalogo(grupoParam);
+
+const grupos = [
+  { id: 'todos', label: 'Todos' },
+  { id: 'peito', label: 'Peito' },
+  { id: 'costas', label: 'Costas' },
+  { id: 'pernas', label: 'Pernas' },
+  { id: 'ombros', label: 'Ombros' },
+  { id: 'bracos', label: 'Braços' },
+  { id: 'core', label: 'Core' },
+  { id: 'cardio', label: 'Cardio' },
+  { id: 'fullbody', label: 'Full Body' },
+];
+---
+<AppLayout ativo="personal_exercicios" title="Catálogo de Exercícios | Academia">
+  <header class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-white/10">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#DC2626]/20 text-red-400 border border-red-500/30">
+          Biblioteca de Movimentos
+        </span>
+        <span class="text-xs text-zinc-400">{exercicios.length} exercícios cadastrados</span>
+      </div>
+      <h1 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-white" style="font-family: Oswald, sans-serif">
+        Catálogo de Exercícios
+      </h1>
+      <p class="mt-1 text-sm text-zinc-400">
+        Consulte as instruções biomecânicas e grupos musculares para montagem das fichas.
+      </p>
+    </div>
+
+    <div>
+      <a
+        href="/app/personal/treino/novo"
+        class="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#DC2626] to-[#F97316] text-white text-sm font-bold shadow-lg shadow-red-950/40 hover:brightness-110 transition active:scale-[0.99]"
+      >
+        + Prescrever Treino
+      </a>
+    </div>
+  </header>
+
+  <!-- Filtro por Grupos Musculares -->
+  <nav aria-label="Grupos musculares" class="mb-8 flex gap-2 overflow-x-auto pb-2">
+    {grupos.map((g) => (
+      <a
+        href={`/app/personal/exercicios?grupo=${g.id}`}
+        class:list={[
+          'px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0 transition',
+          grupoParam === g.id
+            ? 'bg-[#DC2626] text-white shadow-md shadow-red-950/50'
+            : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10',
+        ]}
+      >
+        {g.label}
+      </a>
+    ))}
+  </nav>
+
+  <!-- Grade de Exercícios -->
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {exercicios.map((ex) => (
+      <article class="bg-white/[0.03] border border-white/10 rounded-2xl p-5 hover:border-white/20 transition flex flex-col justify-between gap-4">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-white/5 text-orange-400">
+              {GRUPO_LABEL[ex.grupoMuscular] ?? ex.grupoMuscular}
+            </span>
+            <span class="text-[11px] text-zinc-500">Padrão Ouro</span>
+          </div>
+          <h2 class="font-bold text-white text-base leading-snug">{ex.nome}</h2>
+          {ex.descricao && (
+            <p class="text-xs text-zinc-300 leading-relaxed">{ex.descricao}</p>
+          )}
+        </div>
+
+        <div class="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+          <span class="text-zinc-500">Biomecânica e postura</span>
+          <a
+            href={`/app/personal/treino/novo`}
+            class="text-red-400 hover:text-red-300 font-semibold"
+          >
+            Usar em Ficha →
+          </a>
+        </div>
+      </article>
+    ))}
+  </div>
+</AppLayout>
