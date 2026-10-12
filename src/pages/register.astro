@@ -16,7 +16,7 @@ if (Astro.cookies.get('academia_token')) {
         <h1 class="mt-4 text-2xl font-black tracking-tight text-white" style="font-family: Oswald, sans-serif">Crie sua conta</h1>
         <p class="mt-2 text-sm text-zinc-400">Comece a treinar com acompanhamento profissional.</p>
       </div>
-      <RegisterForm />
+      <RegisterForm client:load />
     </div>
   </main>
   <Footer slot="footer" />
