@@ -443,3 +443,29 @@ export async function excluirTreino(treinoId: string, personalId: string) {
   return removido ?? null;
 }
 
+export async function getCargaMuscularDoAluno(alunoId: string) {
+  const { loadOfExercises } = await import('./muscles');
+
+  const treinos = await db
+    .select({ id: schema.treinos.id })
+    .from(schema.treinos)
+    .where(eq(schema.treinos.alunoId, alunoId));
+
+  if (treinos.length === 0) return {};
+
+  const treinoIds = treinos.map((t) => t.id);
+
+  const itens = await db
+    .select({
+      nome: schema.exercicios.nome,
+      grupoMuscular: schema.exercicios.grupoMuscular,
+      series: schema.treinoExercicios.series,
+    })
+    .from(schema.treinoExercicios)
+    .innerJoin(schema.exercicios, eq(schema.exercicios.id, schema.treinoExercicios.exercicioId))
+    .where(inArray(schema.treinoExercicios.treinoId, treinoIds));
+
+  return loadOfExercises(itens);
+}
+
+

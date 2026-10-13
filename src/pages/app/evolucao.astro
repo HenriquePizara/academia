@@ -3,24 +3,46 @@ import AppLayout from '../../layouts/AppLayout.astro';
 import StatCard from '../../components/app/StatCard.astro';
 import VolumeChart from '../../components/app/VolumeChart.astro';
 import FrequenciaChart from '../../components/app/FrequenciaChart.astro';
+import ActivityHeatmap from '../../components/app/ActivityHeatmap';
+import BodyMap from '../../components/app/BodyMap';
 import { getAuthUser } from '../../lib/auth';
-import { metricasEvolucao } from '../../lib/queries';
+import { metricasEvolucao, historicoExecucoes, getCargaMuscularDoAluno } from '../../lib/queries';
 
 const user = getAuthUser(Astro.cookies);
 if (!user) return Astro.redirect('/login', 302);
 
-const metricas = await metricasEvolucao(user.id, 8);
+const [metricas, historico, cargaMuscular] = await Promise.all([
+  metricasEvolucao(user.id, 8),
+  historicoExecucoes(user.id, 365),
+  getCargaMuscularDoAluno(user.id),
+]);
+
 const semanaAtual = metricas.semanas[metricas.semanas.length - 1] ?? { sessoes: 0, volume: 0 };
 const pico = Math.max(...metricas.evolucaoCarga.map((x) => x.ultimo), 1);
+
+const treinosHeatmap = historico.map((h) => ({
+  data: h.dataExecucao,
+  volume: Number(h.cargaReal) || 0,
+  sessoes: 1,
+}));
 ---
-<AppLayout ativo="evolucao" title="Evolução | Academia">
+<AppLayout ativo="evolucao" title="Evolução & Biomecânica | Academia">
   <header class="mb-8">
-    <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white" style="font-family: Oswald, sans-serif">Sua evolução</h1>
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#DC2626]/20 text-red-400 border border-red-500/30">
+        openGym Engine Integrada
+      </span>
+      <span class="text-xs text-zinc-400">Biomecânica & Consistência</span>
+    </div>
+    <h1 class="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-white" style="font-family: Oswald, sans-serif">
+      Sua evolução completa
+    </h1>
     <p class="mt-2 max-w-[60ch] text-zinc-300">
-      Como sua carga e sua frequência de treino evoluíram nas últimas 8 semanas.
+      Acompanhe o mapa de ativação muscular, frequência anual e progressão de carga das suas rotinas.
     </p>
   </header>
 
+  <!-- KPIs de Resumo -->
   <section aria-labelledby="titulo-kpi-evolucao" class="mb-8">
     <h2 id="titulo-kpi-evolucao" class="sr-only">Resumo</h2>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -31,35 +53,68 @@ const pico = Math.max(...metricas.evolucaoCarga.map((x) => x.ultimo), 1);
     </div>
   </section>
 
-  <div class="grid gap-4 lg:grid-cols-2">
-    <VolumeChart semanas={metricas.semanas} />
-    <FrequenciaChart semanas={metricas.semanas} />
+  <!-- 1. Matriz de Consistência Anual (Activity Heatmap) -->
+  <section aria-labelledby="titulo-heatmap" class="mb-8">
+    <h2 id="titulo-heatmap" class="sr-only">Heatmap Anual</h2>
+    <ActivityHeatmap client:load treinos={treinosHeatmap} />
+  </section>
+
+  <!-- 2. Grid Biomecânico: Mapa Muscular + Gráficos Semanais -->
+  <div class="grid gap-6 lg:grid-cols-2 mb-8">
+    <div>
+      <BodyMap client:load load={cargaMuscular} showDetails={true} className="h-full" />
+    </div>
+
+    <div class="space-y-6">
+      <VolumeChart semanas={metricas.semanas} />
+      <FrequenciaChart semanas={metricas.semanas} />
+    </div>
   </div>
 
+  <!-- 3. Progresso de Carga por Treino com Estimativa 1RM -->
   <section aria-labelledby="titulo-carga" class="mt-8">
-    <h2 id="titulo-carga" class="mb-4 text-sm font-bold tracking-[0.14em] text-white uppercase">Progresso de carga por treino</h2>
+    <div class="flex items-center justify-between mb-4">
+      <h2 id="titulo-carga" class="text-sm font-bold tracking-[0.14em] text-white uppercase flex items-center gap-2">
+        <span class="flex h-5 w-5 items-center justify-center rounded bg-[#DC2626] text-[10px] font-black text-white">
+          PR
+        </span>
+        Progresso de Carga & Recordes Pessoais
+      </h2>
+      <span class="text-xs text-zinc-400">Fórmula de Epley (1RM)</span>
+    </div>
+
     {metricas.evolucaoCarga.length === 0 ? (
       <p class="rounded-2xl border border-dashed border-white/15 px-6 py-12 text-center text-sm text-zinc-400">
         Registre execuções com carga para comparar a evolução de cada treino.
       </p>
     ) : (
       <ul class="space-y-3">
-        {metricas.evolucaoCarga.map((e) => (
-          <li class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <div class="flex flex-wrap items-baseline justify-between gap-2">
-              <h3 class="font-bold text-white">{e.treinoNome}</h3>
-              <p class={"text-sm font-semibold tabular-nums " + (e.variacao > 0 ? "text-emerald-400" : "text-zinc-400")}>
-                {e.variacao > 0 ? "+" : ""}{e.variacao.toLocaleString("pt-BR")} kg
+        {metricas.evolucaoCarga.map((e) => {
+          const e1rm = Math.round(e.ultimo * 1.33); // Estimativa de pico 1RM sobre carga média
+
+          return (
+            <li class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <div class="flex flex-wrap items-baseline justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-white text-base">{e.treinoNome}</h3>
+                  <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-orange-950/40 text-orange-400 border border-orange-500/30">
+                    1RM Est.: ~{e1rm} kg
+                  </span>
+                </div>
+                <p class={"text-sm font-semibold tabular-nums " + (e.variacao > 0 ? "text-emerald-400" : "text-zinc-400")}>
+                  {e.variacao > 0 ? "+" : ""}{e.variacao.toLocaleString("pt-BR")} kg
+                </p>
+              </div>
+              <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div class="h-full rounded-full bg-gradient-to-r from-[#DC2626] to-[#F97316]" style={"width:" + Math.round((e.ultimo / pico) * 100) + "%"}></div>
+              </div>
+              <p class="mt-2 text-xs text-zinc-400 tabular-nums flex items-center justify-between">
+                <span>{e.primeiro.toLocaleString("pt-BR")} kg → {e.ultimo.toLocaleString("pt-BR")} kg</span>
+                <span class="text-zinc-500">{e.pontos.length} sessões registradas</span>
               </p>
-            </div>
-            <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
-              <div class="h-full rounded-full bg-[#DC2626]" style={"width:" + Math.round((e.ultimo / pico) * 100) + "%"}></div>
-            </div>
-            <p class="mt-2 text-sm text-zinc-400 tabular-nums">
-              {e.primeiro.toLocaleString("pt-BR")} kg → {e.ultimo.toLocaleString("pt-BR")} kg em {e.pontos.length} sessões
-            </p>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     )}
   </section>
